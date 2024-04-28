@@ -220,7 +220,7 @@ class Trainer(AbstractTrainer):
             train_loss_output += 'train loss: %.4f' % losses
         return train_loss_output + ']'
 
-    def fit(self, train_data, valid_data=None, test_data=None, saved=False, verbose=True):
+    def fit(self, train_data, valid_data=None, test_data=None, saved=False, saved_path='', best_test_value=0.0, verbose=True):
         r"""Train the model based on the train data and the valid data.
 
         Args:
@@ -279,6 +279,13 @@ class Trainer(AbstractTrainer):
                         self.logger.info(update_output)
                     self.best_valid_result = valid_result
                     self.best_test_upon_valid = test_result
+
+                    if saved:
+                        if self.best_test_upon_valid[self.config['valid_metric'].lower()] > best_test_value:
+                            self.logger.info('====== Saving BEST MODEL weights ======\n')
+                            torch.save(self.model.state_dict(), saved_path + '/' + 'checkpoint.pth')
+                            best_test_value = self.best_test_upon_valid[self.config['valid_metric'].lower()]
+
 
                 if stop_flag:
                     stop_output = '+++++Finished training, best eval result in epoch %d' % \

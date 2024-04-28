@@ -27,6 +27,13 @@ def quick_start(model, dataset, config_dict, save_model=True, mg=False):
     logger.info('██Dir: \t' + os.getcwd() + '\n')
     logger.info(config)
 
+    # save path
+    if save_model:
+        savedname = '{}-{}'.format(config['model'], config['dataset'])
+        savedpath = os.path.join(config['checkpoint_dir'], savedname)
+        if not os.path.exists(savedpath):
+            os.makedirs(savedpath)
+
     # load data
     dataset = RecDataset(config)
     # print dataset statistics
@@ -79,7 +86,7 @@ def quick_start(model, dataset, config_dict, save_model=True, mg=False):
         trainer = get_trainer()(config, model, mg)
         # debug
         # model training
-        best_valid_score, best_valid_result, best_test_upon_valid = trainer.fit(train_data, valid_data=valid_data, test_data=test_data, saved=save_model)
+        best_valid_score, best_valid_result, best_test_upon_valid = trainer.fit(train_data, valid_data=valid_data, test_data=test_data, saved=save_model, saved_path=savedpath, best_test_value=best_test_value )
         #########
         hyper_ret.append((hyper_tuple, best_valid_result, best_test_upon_valid))
 
@@ -87,11 +94,6 @@ def quick_start(model, dataset, config_dict, save_model=True, mg=False):
         if best_test_upon_valid[val_metric] > best_test_value:
             best_test_value = best_test_upon_valid[val_metric]
             best_test_idx = idx
-
-            savedname = '{}-{}'.format(config['model'], config['dataset'])
-            savedpath = os.path.join(config['checkpoint_dir'], savedname, 'checkpoint.pth')
-            if save_model:
-                torch.save(model.state_dict(), savedpath)
 
         idx += 1
 
