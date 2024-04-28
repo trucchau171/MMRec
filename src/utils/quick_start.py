@@ -14,6 +14,7 @@ from utils.configurator import Config
 from utils.utils import init_seed, get_model, get_trainer, dict2str
 import platform
 import os
+import torch
 
 
 def quick_start(model, dataset, config_dict, save_model=True, mg=False):
@@ -86,6 +87,12 @@ def quick_start(model, dataset, config_dict, save_model=True, mg=False):
         if best_test_upon_valid[val_metric] > best_test_value:
             best_test_value = best_test_upon_valid[val_metric]
             best_test_idx = idx
+
+            savedname = '{}-{}'.format(config['model'], config['dataset'])
+            savedpath = os.path.join(config['checkpoint_dir'], savedname, 'checkpoint.pth')
+            if save_model:
+                torch.save(model.state_dict(), savedpath)
+
         idx += 1
 
         logger.info('best valid result: {}'.format(dict2str(best_valid_result)))
